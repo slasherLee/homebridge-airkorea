@@ -1,0 +1,38 @@
+{
+  "name": "homebridge-airkorea",
+  "version": "0.0.1",
+  "description": "Homebridge plugin for AirKorea API",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slasherLee/homebridge-airkorea.git"
+  },
+  "keywords": [
+    "air quality",
+    "airkorea",
+    "homebridge",
+    "homebridge-plugin",
+    "pollution"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.18.2",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.9.0"
+  },
+  "author": "SeungCheol Lee",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/slasherLee/homebridge-airkorea/issues"
+  },
+  "homepage": "https://github.com/slasherLee/homebridge-airkorea#readme",
+  "dependencies": {
+    "request": "^2.83.0"
+  }
+}
