@@ -34,5 +34,5 @@ Field | Required | Default | Description
 `name` | yes | `AirKorea` | Can be specified by user
 `api_key` | yes | | Obtain from http://www.data.go.kr
 `sensor` | no | `air_quality` | Must be `air_quality`
-`station` | no | | Search station name from http://www.data.go.kr
+`station` | yes | | Search station name from http://www.data.go.kr
 `polling` | no | `false` | Must be `true` or `false` (must be a boolean, not a string)
