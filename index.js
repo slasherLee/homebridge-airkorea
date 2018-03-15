@@ -93,8 +93,8 @@ AirKoreaAccessory.prototype = {
                 switch (that.sensor) {
                   case 'air_quality':
 		  default:
-                    that.log.debug('Current khai value is: %s', that.conditions.aqi);
-                    that.log.debug('Current khai grade is: %s', that.conditions.air_quality);
+                    that.log.debug('Current aqi value is: %s', that.conditions.aqi);
+                    that.log.debug('Current aqi grade is: %s', that.conditions.air_quality);
                     if (data.list[0].pm10Value) {
                	      that.conditions.pm10 = parseFloat(data.list[0].pm10Value);
                       that.log.debug('Current PM10 density is: %s', that.conditions.pm10);
