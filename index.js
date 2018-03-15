@@ -85,14 +85,14 @@ AirKoreaAccessory.prototype = {
         switch (response.statusCode) {
           case 200:
                 that.conditions.aqi = parseFloat(data.list[0].khaiValue);
-                that.conditions.air_quality = that.convertGrade(data.list[0].khaiGrade);
+                that.conditions.air_quality = that.convertGrade(data.list[0].khaiValue);
 
                 that.log.debug('Time is: %s', data.list[0].dataTime);
                 that.log.debug('Station is: %s', data.parm.stationName);
 
                 switch (that.sensor) {
                   case 'air_quality':
-		  default:
+		  		  default:
                     that.log.debug('Current aqi value is: %s', that.conditions.aqi);
                     that.log.debug('Current aqi grade is: %s', that.conditions.air_quality);
                     if (data.list[0].pm10Value) {
@@ -115,6 +115,27 @@ AirKoreaAccessory.prototype = {
                       that.sensorService
                         .getCharacteristic(Characteristic.OzoneDensity)
                         .setValue(that.conditions.o3); 
+                    }
+					if (data.list[0].no2Value) {
+                      that.conditions.no2 = parseFloat(data.list[0].no2Value) * 1000;
+					  that.log.debug('Current NO2 density is: %s', that.conditions.no2);
+                      that.sensorService
+                        .getCharacteristic(Characteristic.NitrogenDioxideDensity)
+                        .setValue(that.conditions.no2); 
+                    }
+                    if (data.list[0].so2Value) {
+                      that.conditions.so2 = parseFloat(data.list[0].so2Value) * 1000;
+					  that.log.debug('Current SO2 density is: %s', that.conditions.so2);
+                      that.sensorService
+                        .getCharacteristic(Characteristic.SulphurDioxideDensity)
+                        .setValue(that.conditions.so2); 
+                    }
+                    if (data.list[0].coValue) {
+                      that.conditions.co = parseFloat(data.list[0].coValue);
+                      that.log.debug('Current CO density is: %s', that.conditions.co);
+                      that.sensorService
+                        .getCharacteristic(Characteristic.CarbonMonoxideLevel)
+                        .setValue(that.conditions.co); 
                     }
                     break;
                 }
@@ -143,14 +164,16 @@ AirKoreaAccessory.prototype = {
     var characteristic;
     if (!grade) {
       characteristic = Characteristic.AirQuality.UNKNOWN;
-    } else if (grade == 4) {
+    } else if (grade >= 201) {
       characteristic = Characteristic.AirQuality.POOR;
-    } else if (grade == 3) {
+    } else if (grade >= 151) {
       characteristic = Characteristic.AirQuality.INFERIOR;
-    } else if (grade == 2) {
+    } else if (grade >= 101) {
       characteristic = Characteristic.AirQuality.FAIR;
-    } else if (grade == 1) {
+    } else if (grade >= 51) {
       characteristic = Characteristic.AirQuality.GOOD;
+    } else if (grade >= 0) {
+      characteristic = Characteristic.AirQuality.EXCELLENT;
     } else {
       characteristic = Characteristic.AirQuality.UNKNOWN;
     }
