@@ -104,13 +104,13 @@ AirKoreaAccessory.prototype = {
                     }
                     if (data.list[0].pm25Value) {
                	      that.conditions.pm25 = parseFloat(data.list[0].pm25Value);
-                      that.log.debug('Current PM25 density is: %s', that.conditions.pm10);
+                      that.log.debug('Current PM25 density is: %s', that.conditions.pm25);
                       that.sensorService
                         .getCharacteristic(Characteristic.PM2_5Density)
-                        .setValue(that.conditions.pm10); 
+                        .setValue(that.conditions.pm25); 
                     }
                     if (data.list[0].o3Value) {
-               	      that.conditions.o3 = parseFloat(data.list[0].o3Value);
+               	      that.conditions.o3 = parseFloat(data.list[0].o3Value) * 1000;
                       that.log.debug('Current Ozon density is: %s', that.conditions.o3);
                       that.sensorService
                         .getCharacteristic(Characteristic.OzoneDensity)
@@ -151,8 +151,6 @@ AirKoreaAccessory.prototype = {
       characteristic = Characteristic.AirQuality.FAIR;
     } else if (grade == 1) {
       characteristic = Characteristic.AirQuality.GOOD;
-    } else if (grade == 0) {
-      characteristic = Characteristic.AirQuality.EXCELLENT;
     } else {
       characteristic = Characteristic.AirQuality.UNKNOWN;
     }
