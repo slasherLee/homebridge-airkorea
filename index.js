@@ -13,7 +13,7 @@ function AirKoreaAccessory(log, config) {
   this.sensor = config.sensor || 'air_quality';
   this.station = config.station;
   this.polling = config.polling || false;
-  this.serial = 'station';
+  this.interval = config.interval * 60  * 1000;
 
   if (!this.key) {
     throw new Error('API key not specified');
@@ -23,20 +23,22 @@ function AirKoreaAccessory(log, config) {
     this.sensor = 'air_quality';
   }
   if (!this.station) {
-    throw new Error('station not specified');
+    throw new Error('station is not specified');
   }
   if (!([true, false].indexOf(this.polling) > -1)) {
     this.log.error('Unsupported option specified for polling, defaulting to false');
     this.polling = false;
   }
-
+  if (!this.interval) {
+    this.log.error('interval is not specified, defaulting to 60');
+    this.interval = 60 * 60 * 1000;
+  }
 
   if (this.polling) {
     var that = this;
-    this.interval = 60 * 60000;
     setTimeout(function () {
       that.servicePolling();
-    }, this.interval);
+    }, that.interval);
   }
 
   this.log.debug('Polling is %s', (this.polling) ? 'enabled' : 'disabled');
@@ -192,9 +194,9 @@ AirKoreaAccessory.prototype = {
 
     this.accessoryInformationService
       .setCharacteristic(Characteristic.FirmwareRevision, firmware)
-      .setCharacteristic(Characteristic.Manufacturer, 'AirKorea')
+      .setCharacteristic(Characteristic.Manufacturer, 'slasherLee')
       .setCharacteristic(Characteristic.Name, this.name)
-      .setCharacteristic(Characteristic.SerialNumber, this.serial);
+      .setCharacteristic(Characteristic.SerialNumber, this.station);
 
     this.accessoryInformationService
       .setCharacteristic(Characteristic.Identify)
