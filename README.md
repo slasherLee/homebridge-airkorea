@@ -35,4 +35,5 @@ Field | Required | Default | Description
 `api_key` | yes | | Obtain from http://www.data.go.kr
 `sensor` | no | `air_quality` | Must be `air_quality`
 `station` | yes | | Search station name from http://www.data.go.kr
+`interval` | no | 60(minutes) | Can be specified by user, minutes(must be a number)
 `polling` | no | `false` | Must be `true` or `false` (must be a boolean, not a string)
