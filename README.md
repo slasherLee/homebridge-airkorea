@@ -21,6 +21,7 @@ Example config.json:
     "sensor": "air_quality",
     "api_key": "",
     "station": "",
+    "interval": 60,
     "polling": true
   }
 ],
