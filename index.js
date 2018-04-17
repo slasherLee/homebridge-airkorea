@@ -14,6 +14,10 @@ function AirKoreaAccessory(log, config) {
     this.station = config.station;
     this.polling = config.polling || false;
     this.interval = config.interval * 60 * 1000;
+    if(!config.creteria)
+        this.creteria = 'khai';
+    else
+        this.creteria = config.creteria;
 
     if (!this.key) {
         throw new Error('API key not specified');
@@ -77,6 +81,9 @@ AirKoreaAccessory.prototype = {
     getData: function (callback) {
         var that = this;
         var url = 'http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=' +                   encodeURIComponent(that.station) + '&dataTerm=month&pageNo=1&numOfRows=1&ServiceKey=' + that.key + '&_returnType=json'
+        var khai_grade = Characteristic.AirQuality.UNKNOWN;
+        var pm25_grade = Characteristic.AirQuality.UNKNOWN;
+        var pm10_grade = Characteristic.AirQuality.UNKNOWN;
 
         request({
             url: url,
@@ -93,29 +100,29 @@ AirKoreaAccessory.prototype = {
                             case 'air_quality':
                             default:
                                 if( data.list[0].khaiValue != "-" ) {
+                                    khai_grade = that.convertKhaiGrade(data.list[0].khaiValue);
                                     that.conditions.aqi = parseFloat(data.list[0].khaiValue);
-                                    that.conditions.air_quality = that.convertGrade(data.list[0].khaiValue);
-                                    that.log.debug('Current aqi value is: %s', that.conditions.aqi);
-                                    that.log.debug('Current aqi grade is: %s', that.conditions.air_quality);
-                                }
-                                else {
-                                    that.conditions.aqi = NaN;
-                                    that.conditions.air_quality = NaN;
+                                    that.log.debug('Current khai grade is: %s', khai_grade);
+                                    that.log.debug('Current khai value is: %s', that.conditions.aqi);
                                 }
 
                                 if (data.list[0].pm10Value != "-") {
+                                    pm10_grade = that.convertPm10Grade(data.list[0].pm10Value);
                                     that.conditions.pm10 = parseFloat(data.list[0].pm10Value);
                                     that.log.debug('Current PM10 density is: %s', that.conditions.pm10);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.PM10Density)
                                         .setValue(that.conditions.pm10); 
+                                    that.log.debug('Current pm10 grade is: %s', pm10_grade);
                                 }
                                 if (data.list[0].pm25Value != "-") {
+                                    pm25_grade = that.convertPm25Grade(data.list[0].pm25Value);
                                     that.conditions.pm25 = parseFloat(data.list[0].pm25Value);
                                     that.log.debug('Current PM25 density is: %s', that.conditions.pm25);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.PM2_5Density)
                                         .setValue(that.conditions.pm25); 
+                                    that.log.debug('Current pm25 grade is: %s', pm25_grade);
                                 }
                                 if (data.list[0].o3Value != "-") {
                                     that.conditions.o3 = parseFloat(data.list[0].o3Value) * 1000;
@@ -145,11 +152,15 @@ AirKoreaAccessory.prototype = {
                                         .getCharacteristic(Characteristic.CarbonMonoxideLevel)
                                         .setValue(that.conditions.co); 
                                 }
+
+                                that.conditions.air_quality = that.getCreteriaGrade(that.creteria, khai_grade, pm10_grade, pm25_grade);
+
+                                that.sensorService
+                                    .getCharacteristic(Characteristic.Version)
+                                    .setValue(data.list[0].dataTime); 
+                                
                             break;
                         }
-                        that.sensorService
-                            .getCharacteristic(Characteristic.StatusActive)
-                            .setValue(true);
                     break;
                     default:
                         that.log.error('Response: %s', response.statusCode);
@@ -169,25 +180,93 @@ AirKoreaAccessory.prototype = {
     },
 
 
-    convertGrade: function (grade) {
-        var characteristic;
-        if (!grade) {
-            characteristic = Characteristic.AirQuality.UNKNOWN;
-        } else if (grade >= 201) {
-            characteristic = Characteristic.AirQuality.POOR;
-        } else if (grade >= 151) {
-            characteristic = Characteristic.AirQuality.INFERIOR;
-        } else if (grade >= 101) {
-            characteristic = Characteristic.AirQuality.FAIR;
-        } else if (grade >= 51) {
-            characteristic = Characteristic.AirQuality.GOOD;
-        } else if (grade >= 0) {
-            characteristic = Characteristic.AirQuality.EXCELLENT;
+    convertKhaiGrade: function (value) {
+        var grade;
+        if (!value) {
+            grade = Characteristic.AirQuality.UNKNOWN;
+        } else if (value >= 201) {
+            grade = Characteristic.AirQuality.POOR;
+        } else if (value >= 151) {
+            grade = Characteristic.AirQuality.INFERIOR;
+        } else if (value >= 101) {
+            grade = Characteristic.AirQuality.FAIR;
+        } else if (value >= 51) {
+            grade = Characteristic.AirQuality.GOOD;
+        } else if (value >= 0) {
+            grade = Characteristic.AirQuality.EXCELLENT;
         } else {
-            characteristic = Characteristic.AirQuality.UNKNOWN;
+            grade = Characteristic.AirQuality.UNKNOWN;
         }
-        return characteristic;
+        return grade;
     },
+
+    convertPm10Grade: function (value) {
+        var grade;
+        if (!value) {
+            grade = Characteristic.AirQuality.UNKNOWN;
+        } else if (value >= 151) {
+            grade = Characteristic.AirQuality.POOR;
+        } else if (value >= 81) {
+            grade = Characteristic.AirQuality.INFERIOR;
+        } else if (value >= 31) {
+            grade = Characteristic.AirQuality.FAIR;
+        } else if (value >= 1) {
+            grade = Characteristic.AirQuality.GOOD;
+        } else if (value == 0) {
+            grade = Characteristic.AirQuality.EXCELLENT;
+        } else {
+            grade = Characteristic.AirQuality.UNKNOWN;
+        }
+        return grade;
+    },
+
+    convertPm25Grade: function (value) {
+        var grade;
+        if (!value) {
+            grade = Characteristic.AirQuality.UNKNOWN;
+        } else if (value >= 76) {
+            grade = Characteristic.AirQuality.POOR;
+        } else if (value >= 36) {
+            grade = Characteristic.AirQuality.INFERIOR;
+        } else if (value >= 16) {
+            grade = Characteristic.AirQuality.FAIR;
+        } else if (value >= 1) {
+            grade = Characteristic.AirQuality.GOOD;
+        } else if (value == 0) {
+            grade = Characteristic.AirQuality.EXCELLENT;
+        } else {
+            grade = Characteristic.AirQuality.UNKNOWN;
+        }
+        return grade;
+    },
+
+    getCreteriaGrade: function (creteria, khai_grade, pm10_grade, pm25_grade) {
+        var grade = Characteristic.AirQuality.UNKNOWN;
+
+        if(creteria.search('khai') != -1 && khai_grade != Characteristic.AirQuality.UNKNOWN)
+        {
+            grade = khai_grade;
+        }
+
+        if(creteria.search('pm10') != -1 && pm10_grade != Characteristic.AirQuality.UNKNOWN)
+        {
+            if( pm10_grade > grade )
+            {
+                grade = pm10_grade;
+            }
+        }
+
+        if(creteria.search('pm25') != -1 && pm25_grade != Characteristic.AirQuality.UNKNOWN)
+        {
+            if( pm25_grade > grade )
+            {
+                grade = pm25_grade;
+            }
+        }
+        
+        return grade;
+    },
+
 
     identify: function (callback) {
         this.log.debug('Identified');
