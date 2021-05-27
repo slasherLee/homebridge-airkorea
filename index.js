@@ -80,7 +80,7 @@ AirKoreaAccessory.prototype = {
 
     getData: function (callback) {
         var that = this;
-        var url = 'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=' +                   encodeURIComponent(that.station) + '&dataTerm=month&pageNo=1&numOfRows=1&ServiceKey=' + that.key + '&_returnType=json'
+        var url = 'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=' +                   encodeURIComponent(that.station) + '&dataTerm=month&pageNo=1&numOfRows=1&ServiceKey=' + that.key + '&returnType=json'
         var khai_grade = Characteristic.AirQuality.UNKNOWN;
         var pm25_grade = Characteristic.AirQuality.UNKNOWN;
         var pm10_grade = Characteristic.AirQuality.UNKNOWN;
@@ -92,61 +92,60 @@ AirKoreaAccessory.prototype = {
             if (!error) {
                 switch (response.statusCode) {
                     case 200:
-
-                        that.log.debug('Time is: %s', data.list[0].dataTime);
-                        that.log.debug('Station is: %s', data.parm.stationName);
+                        var list = data.response.body.items;
+                        that.log.debug('Time is: %s', list[0].dataTime);
 
                         switch (that.sensor) {
                             case 'air_quality':
                             default:
-                                if( data.list[0].khaiValue != "-" ) {
-                                    khai_grade = that.convertKhaiGrade(data.list[0].khaiValue);
-                                    that.conditions.aqi = parseFloat(data.list[0].khaiValue);
+                                if( list[0].khaiValue != "-" ) {
+                                    khai_grade = that.convertKhaiGrade(list[0].khaiValue);
+                                    that.conditions.aqi = parseFloat(list[0].khaiValue);
                                     that.log.debug('Current khai grade is: %s', khai_grade);
                                     that.log.debug('Current khai value is: %s', that.conditions.aqi);
                                 }
 
-                                if (data.list[0].pm10Value != "-") {
-                                    pm10_grade = that.convertPm10Grade(data.list[0].pm10Value);
-                                    that.conditions.pm10 = parseFloat(data.list[0].pm10Value);
+                                if (list[0].pm10Value && list[0].pm10Value != "-") {
+                                    pm10_grade = that.convertPm10Grade(list[0].pm10Value);
+                                    that.conditions.pm10 = parseFloat(list[0].pm10Value);
                                     that.log.debug('Current PM10 density is: %s', that.conditions.pm10);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.PM10Density)
                                         .setValue(that.conditions.pm10); 
                                     that.log.debug('Current pm10 grade is: %s', pm10_grade);
                                 }
-                                if (data.list[0].pm25Value != "-") {
-                                    pm25_grade = that.convertPm25Grade(data.list[0].pm25Value);
-                                    that.conditions.pm25 = parseFloat(data.list[0].pm25Value);
+                                if (list[0].pm25Value && list[0].pm25Value != "-") {
+                                    pm25_grade = that.convertPm25Grade(list[0].pm25Value);
+                                    that.conditions.pm25 = parseFloat(list[0].pm25Value);
                                     that.log.debug('Current PM25 density is: %s', that.conditions.pm25);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.PM2_5Density)
                                         .setValue(that.conditions.pm25); 
                                     that.log.debug('Current pm25 grade is: %s', pm25_grade);
                                 }
-                                if (data.list[0].o3Value != "-") {
-                                    that.conditions.o3 = parseFloat(data.list[0].o3Value) * 1000;
+                                if (list[0].03Value && list[0].o3Value != "-") {
+                                    that.conditions.o3 = parseFloat(list[0].o3Value) * 1000;
                                     that.log.debug('Current Ozon density is: %s', that.conditions.o3);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.OzoneDensity)
                                         .setValue(that.conditions.o3); 
                                 }
-                                if (data.list[0].no2Value != "-") {
-                                    that.conditions.no2 = parseFloat(data.list[0].no2Value) * 1000;
+                                if (list[0].no2Value && list[0].no2Value != "-") {
+                                    that.conditions.no2 = parseFloat(list[0].no2Value) * 1000;
                                     that.log.debug('Current NO2 density is: %s', that.conditions.no2);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.NitrogenDioxideDensity)
                                         .setValue(that.conditions.no2); 
                                 }
-                                if (data.list[0].so2Value != "-") {
-                                    that.conditions.so2 = parseFloat(data.list[0].so2Value) * 1000;
+                                if (list[0].so2Value && list[0].so2Value != "-") {
+                                    that.conditions.so2 = parseFloat(list[0].so2Value) * 1000;
                                     that.log.debug('Current SO2 density is: %s', that.conditions.so2);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.SulphurDioxideDensity)
                                         .setValue(that.conditions.so2); 
                                 }
-                                if (data.list[0].coValue != "-") {
-                                    that.conditions.co = parseFloat(data.list[0].coValue);
+                                if (list[0].coValue && list[0].coValue != "-") {
+                                    that.conditions.co = parseFloat(list[0].coValue);
                                     that.log.debug('Current CO density is: %s', that.conditions.co);
                                     that.sensorService
                                         .getCharacteristic(Characteristic.CarbonMonoxideLevel)
@@ -155,10 +154,6 @@ AirKoreaAccessory.prototype = {
 
                                 that.conditions.air_quality = that.getCreteriaGrade(that.creteria, khai_grade, pm10_grade, pm25_grade);
 
-                                that.sensorService
-                                    .getCharacteristic(Characteristic.Version)
-                                    .setValue(data.list[0].dataTime); 
-                                
                             break;
                         }
                     break;

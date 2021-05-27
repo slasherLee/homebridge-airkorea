@@ -1,6 +1,6 @@
 {
   "name": "homebridge-airkorea",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Homebridge plugin for AirKorea API",
   "main": "index.js",
   "scripts": {
