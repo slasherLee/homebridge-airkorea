@@ -153,6 +153,9 @@ AirKoreaAccessory.prototype = {
                                 }
 
                                 that.conditions.air_quality = that.getCreteriaGrade(that.creteria, khai_grade, pm10_grade, pm25_grade);
+                                that.sensorService 
+                                    .getCharacteristic(Characteristic.StatusActive)
+                                    .setValue(true);
 
                             break;
                         }
