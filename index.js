@@ -123,7 +123,7 @@ AirKoreaAccessory.prototype = {
                                         .setValue(that.conditions.pm25); 
                                     that.log.debug('Current pm25 grade is: %s', pm25_grade);
                                 }
-                                if (list[0].03Value && list[0].o3Value != "-") {
+                                if (list[0].o3Value && list[0].o3Value != "-") {
                                     that.conditions.o3 = parseFloat(list[0].o3Value) * 1000;
                                     that.log.debug('Current Ozon density is: %s', that.conditions.o3);
                                     that.sensorService
