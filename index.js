@@ -80,7 +80,7 @@ AirKoreaAccessory.prototype = {
 
     getData: function (callback) {
         var that = this;
-        var url = 'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=' +                   encodeURIComponent(that.station) + '&dataTerm=month&pageNo=1&numOfRows=1&ServiceKey=' + that.key + '&returnType=json'
+        var url = 'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=' +                   encodeURIComponent(that.station) + '&dataTerm=daily&pageNo=1&numOfRows=1&ver=1.3&ServiceKey=' + that.key + '&returnType=json'
         var khai_grade = Characteristic.AirQuality.UNKNOWN;
         var pm25_grade = Characteristic.AirQuality.UNKNOWN;
         var pm10_grade = Characteristic.AirQuality.UNKNOWN;
